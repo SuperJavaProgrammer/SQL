@@ -134,3 +134,135 @@ FETCH FIRST 50 PERCENT ROWS ONLY;
 SELECT * FROM Customers
 WHERE Country='Germany'
 FETCH FIRST 3 ROWS ONLY;
+
+    11. MIN() and MAX()
+SELECT MIN(column_name) (AS Name)
+FROM table_name
+--WHERE condition;
+SELECT MAX(column_name)
+FROM table_name
+--WHERE condition;
+
+SELECT MIN(Price) AS SmallestPrice
+FROM Products;
+SELECT MAX(Price) AS LargestPrice
+FROM Products;
+
+	12. COUNT(), AVG() and SUM() Functions
+Note: NULL values are not counted.
+
+SELECT COUNT(column_name) (AS Name)
+FROM table_name
+--WHERE condition;
+SELECT AVG(column_name) (AS Name)
+FROM table_name
+--WHERE condition;
+SELECT SUM(column_name) (AS Name)
+FROM table_name
+--WHERE condition;
+
+SELECT COUNT(ProductID)
+FROM Products;
+SELECT AVG(Price)
+FROM Products;
+SELECT SUM(Quantity)
+FROM OrderDetails;
+
+	13. LIKE Operator
+The percent sign (%) represents zero, one, or multiple characters
+The underscore sign (_) represents one, single character
+The percent sign and the underscore can also be used in combinations!
+
+SELECT column1, column2, ...
+FROM table_name
+WHERE columnN LIKE pattern;
+
+SELECT * FROM Customers
+WHERE CustomerName LIKE 'a%';
+SELECT * FROM Customers
+WHERE CustomerName LIKE '%or%';
+SELECT * FROM Customers
+WHERE CustomerName LIKE '_r%';
+SELECT * FROM Customers
+WHERE CustomerName LIKE 'a__%';
+SELECT * FROM Customers
+WHERE ContactName LIKE 'a%o';
+SELECT * FROM Customers
+WHERE CustomerName NOT LIKE 'a%';
+
+	14. Wildcards
+Wildcard Characters in MS Access/SQL Server
+*/%	Represents zero or more characters	bl* finds bl, black, blue, and blob
+?/_	Represents a single character	h?t finds hot, hat, and hit
+[]	Represents any single character within the brackets	h[oa]t finds hot and hat, but not hit
+!/^	Represents any character not in the brackets	h[!oa]t finds hit, but not hot and hat
+-	Represents a range of characters	c[a-b]t finds cat and cbt
+#	Represents any single numeric character	2#5 finds 205, 215, 225, 235, 245, 255, 265, 275, 285, and 295
+
+SELECT * FROM Customers
+WHERE City LIKE '[!bsp]%';
+
+	15. IN
+The IN operator is a shorthand for multiple OR conditions
+
+SELECT column_name(s)
+FROM table_name
+WHERE column_name IN (value1, value2, ...);
+SELECT column_name(s)
+FROM table_name
+WHERE column_name IN (SELECT STATEMENT);
+
+SELECT * FROM Customers
+WHERE Country IN ('Germany', 'France', 'UK');
+SELECT * FROM Customers
+WHERE Country NOT IN ('Germany', 'France', 'UK');
+SELECT * FROM Customers
+WHERE Country IN (SELECT Country FROM Suppliers);
+
+	16. BETWEEN
+The BETWEEN operator selects values within a given range. The values can be numbers, text, or dates. Begin and end values are included.
+
+SELECT column_name(s)
+FROM table_name
+WHERE column_name BETWEEN value1 AND value2;
+
+SELECT * FROM Products
+WHERE Price BETWEEN 10 AND 20;
+SELECT * FROM Products
+WHERE Price NOT BETWEEN 10 AND 20
+AND CategoryID NOT IN (1, 2, 3);
+SELECT * FROM Products
+WHERE ProductName BETWEEN 'Carnarvon Tigers' AND 'Mozzarella di Giovanni'
+ORDER BY ProductName;
+SELECT * FROM Orders
+WHERE OrderDate BETWEEN #07/01/1996# AND #07/31/1996#;
+SELECT * FROM Orders
+WHERE OrderDate BETWEEN '1996-07-01' AND '1996-07-31';
+
+	17. Aliases
+It requires double quotation marks or square brackets if the alias name contains spaces:
+
+SELECT column_name AS alias_name
+FROM table_name AS alias_name;
+SELECT CustomerName AS Customer, ContactName AS [Contact Person]
+FROM Customers;
+SELECT CustomerName, CONCAT(Address,', ',PostalCode,', ',City,', ',Country) AS Address
+FROM Customers;
+
+SELECT CustomerID AS ID, CustomerName AS Customer
+FROM Customers;
+SELECT CustomerName AS Customer, ContactName AS [Contact Person]
+FROM Customers;
+SELECT CustomerName, Address + ', ' + PostalCode + ' ' + City + ', ' + Country AS Address
+FROM Customers;
+SELECT CustomerName, CONCAT(Address,', ',PostalCode,', ',City,', ',Country) AS Address --MySQL
+FROM Customers;
+SELECT o.OrderID, o.OrderDate, c.CustomerName
+FROM Customers AS c, Orders AS o
+WHERE c.CustomerName='Around the Horn' AND c.CustomerID=o.CustomerID;
+
+	18. Joins
+(INNER) JOIN: Returns records that have matching values in both tables
+LEFT (OUTER) JOIN: Returns all records from the left table, and the matched records from the right table
+RIGHT (OUTER) JOIN: Returns all records from the right table, and the matched records from the left table
+FULL (OUTER) JOIN: Returns all records when there is a match in either left or right table
