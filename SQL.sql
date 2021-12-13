@@ -485,3 +485,196 @@ WHERE ProductID = ALL
   (SELECT ProductID
   FROM OrderDetails
   WHERE Quantity = 10);
+
+	29. SELECT INTO
+The SELECT INTO statement copies data from one table into a new table.
+
+SELECT column1, column2, column3, ...
+INTO newtable [IN externaldb]
+FROM oldtable
+WHERE condition;
+
+The following SQL statement creates a backup copy of Customers:
+SELECT * INTO CustomersBackup2017
+FROM Customers;
+The following SQL statement uses the IN clause to copy the table into a new table in another database:
+SELECT * INTO CustomersBackup2017 IN 'Backup.mdb'
+FROM Customers;
+The following SQL statement copies only the German customers into a new table:
+SELECT * INTO CustomersGermany
+FROM Customers
+WHERE Country = 'Germany';
+The following SQL statement copies data from more than one table into a new table:
+SELECT Customers.CustomerName, Orders.OrderID
+INTO CustomersOrderBackup2017
+FROM Customers
+LEFT JOIN Orders ON Customers.CustomerID = Orders.CustomerID;
+Tip: SELECT INTO can also be used to create a new, empty table using the schema of another. Just add a WHERE clause that causes the query to return no data:
+SELECT * INTO newtable
+FROM oldtable
+WHERE 1 = 0;
+
+	30. INSERT INTO SELECT
+The INSERT INTO SELECT statement copies data from one table and inserts it into another table.
+The INSERT INTO SELECT statement requires that the data types in source and target tables match.
+
+INSERT INTO table2
+SELECT * FROM table1
+WHERE condition;
+INSERT INTO table2 (column1, column2, column3, ...)
+SELECT column1, column2, column3, ...
+FROM table1
+WHERE condition;
+
+The following SQL statement copies "Suppliers" into "Customers" (the columns that are not filled with data, will contain NULL):
+INSERT INTO Customers (CustomerName, City, Country)
+SELECT SupplierName, City, Country FROM Suppliers;
+The following SQL statement copies only the German suppliers into "Customers":
+INSERT INTO Customers (CustomerName, City, Country)
+SELECT SupplierName, City, Country FROM Suppliers
+WHERE Country='Germany';
+
+	31. CASE
+The CASE statement goes through conditions and returns a value when the first condition is met (like an if-then-else statement).
+So, once a condition is true, it will stop reading and return the result. If no conditions are true, it returns the value in the ELSE clause.
+If there is no ELSE part and no conditions are true, it returns NULL.
+
+CASE
+    WHEN condition1 THEN result1
+    WHEN condition2 THEN result2
+    WHEN conditionN THEN resultN
+    ELSE result
+END;
+
+The following SQL goes through conditions and returns a value when the first condition is met:
+SELECT OrderID, Quantity,
+CASE
+    WHEN Quantity > 30 THEN 'The quantity is greater than 30'
+    WHEN Quantity = 30 THEN 'The quantity is 30'
+    ELSE 'The quantity is under 30'
+END AS QuantityText
+FROM OrderDetails;
+The following SQL will order the customers by City. However, if City is NULL, then order by Country:
+SELECT CustomerName, City, Country
+FROM Customers
+ORDER BY
+(CASE
+    WHEN City IS NULL THEN Country
+    ELSE City
+END);
+
+	32. NULL Functions
+Function lets you return an alternative value if an expression is NULL:
+
+IFNULL(UnitsOnOrder, 0) or COALESCE(UnitsOnOrder, 0) -- MySQL
+NVL(UnitsOnOrder, 0) -- Oracle
+
+SELECT ProductName, UnitPrice * (UnitsInStock + NVL(UnitsOnOrder, 0))
+FROM Products;
+
+	33. Stored Procedures
+A stored procedure is a prepared SQL code that you can save, so the code can be reused over and over again.
+So if you have an SQL query that you write over and over again, save it as a stored procedure, and then just call it to execute it.
+You can also pass parameters to a stored procedure, so that the stored procedure can act based on the parameter value(s) that is passed.
+
+CREATE PROCEDURE procedure_name [@City nvarchar(30), @PostalCode nvarchar(10)]
+AS
+sql_statement
+GO;
+Execute a Stored Procedure
+EXEC procedure_name [@City = 'London', @PostalCode = 'WA1 1DP'];
+
+The following SQL statement creates a stored procedure named "SelectAllCustomers" that selects all records from the "Customers" table:
+CREATE PROCEDURE SelectAllCustomers
+AS
+SELECT * FROM Customers
+GO;
+Execute the stored procedure above as follows:
+EXEC SelectAllCustomers;
+CREATE PROCEDURE SelectAllCustomers @City nvarchar(30)
+AS
+SELECT * FROM Customers WHERE City = @City
+GO;
+EXEC SelectAllCustomers @City = 'London';
+CREATE PROCEDURE SelectAllCustomers @City nvarchar(30), @PostalCode nvarchar(10)
+AS
+SELECT * FROM Customers WHERE City = @City AND PostalCode = @PostalCode
+GO;
+EXEC SelectAllCustomers @City = 'London', @PostalCode = 'WA1 1DP';
+
+	34. Comments
+Comments are used to explain sections of SQL statements, or to prevent execution of SQL statements.
+
+--Select all:
+SELECT * FROM Customers;
+SELECT * FROM Customers -- WHERE City='Berlin';
+/*Select all the columns
+of all the records
+in the Customers table:*/
+SELECT * FROM Customers;
+
+	35. Operators
+  Arithmetic
++	Add
+-	Subtract
+*	Multiply
+/	Divide
+%	Modulo
+  Bitwise
+&	Bitwise AND
+|	Bitwise OR
+^	Bitwise exclusive OR
+  Comparison
+=	Equal to
+>	Greater than
+<	Less than
+>=	Greater than or equal to
+<=	Less than or equal to
+<>	Not equal to
+  Compound
++=	Add equals
+-=	Subtract equals
+*=	Multiply equals
+/=	Divide equals
+%=	Modulo equals
+&=	Bitwise AND equals
+^-=	Bitwise exclusive equals
+|*=	Bitwise OR equals
+  Logical
+ALL	    TRUE if all of the subquery values meet the condition
+AND	    TRUE if all the conditions separated by AND is TRUE
+ANY	    TRUE if any of the subquery values meet the condition
+BETWEEN	TRUE if the operand is within the range of comparisons
+EXISTS	TRUE if the subquery returns one or more records
+IN	    TRUE if the operand is equal to one of a list of expressions
+LIKE	TRUE if the operand matches a pattern
+NOT	    Displays a record if the condition(s) is NOT TRUE
+OR	    TRUE if any of the conditions separated by OR is TRUE
+SOME	TRUE if any of the subquery values meet the condition
+
+	36. CREATE DATABASE
+CREATE DATABASE databasename;
+SHOW DATABASES;
+
+CREATE DATABASE testDB;
+
+	37. DROP DATABASE
+DROP DATABASE databasename;
+
+DROP DATABASE testDB;
+SHOW DATABASES;
+
+	38. BACKUP DATABASE
+Always back up the database to a different drive than the actual database. Then, if you get a disk crash,
+you will not  lose your backup file along with the database.
+A differential back up only backs up the parts of the database that have changed since the last full database backup.
+
+BACKUP DATABASE databasename
+TO DISK = 'filepath';
+BACKUP DATABASE databasename
+TO DISK = 'filepath'
+WITH DIFFERENTIAL;
+
+BACKUP DATABASE testDB
+TO DISK = 'D:\backups\testDB.bak'
+WITH DIFFERENTIAL;
