@@ -678,3 +678,169 @@ WITH DIFFERENTIAL;
 BACKUP DATABASE testDB
 TO DISK = 'D:\backups\testDB.bak'
 WITH DIFFERENTIAL;
+
+	39. CREATE TABLE
+The column parameters specify the names of the columns of the table.
+The datatype parameter specifies the type of data the column can hold (e.g. varchar, integer, date, etc.).
+CREATE TABLE table_name (
+    column1 datatype,
+    column2 datatype,
+    column3 datatype,
+   ....
+);
+
+A copy of an existing table can also be created using CREATE TABLE.
+The new table gets the same column definitions. All columns or specific columns can be selected.
+If you create a new table using an existing table, the new table will be filled with the existing values from the old table.
+CREATE TABLE new_table_name AS
+    SELECT column1, column2,...
+    FROM existing_table_name
+    WHERE ....;
+
+CREATE TABLE Persons (
+    PersonID int,
+    LastName varchar(255),
+    FirstName varchar(255),
+    Address varchar(255),
+    City varchar(255)
+);
+The following SQL creates a new table called "TestTables" (which is a copy of the "Customers" table):
+CREATE TABLE TestTable AS
+SELECT customername, contactname
+FROM customers;
+
+	40. DROP TABLE
+The TRUNCATE TABLE statement is used to delete the data inside a table, but not the table itself.
+
+DROP TABLE table_name;
+TRUNCATE TABLE table_name;
+
+DROP TABLE Shippers;
+TRUNCATE TABLE Shippers;
+
+	41. ALTER TABLE
+The ALTER TABLE statement is used to add, delete, or modify columns in an existing table.
+The ALTER TABLE statement is also used to add and drop various constraints on an existing table.
+
+ALTER TABLE table_name
+ADD column_name datatype;
+ALTER TABLE table_name
+DROP COLUMN column_name;
+ALTER TABLE table_name
+MODIFY COLUMN column_name datatype; --MODIFY column_name datatype; --Oracle 10G and later:
+
+ALTER TABLE Customers
+ADD Email varchar(255);
+ALTER TABLE Customers
+DROP COLUMN Email;
+ALTER TABLE Persons
+MODIFY DateOfBirth year; --ALTER COLUMN column_name datatype; SQL Server/MS Access/My SQL/Oracle (prior version 10G)
+
+	42. Constraints
+SQL constraints are used to specify rules for data in a table.
+Constraints can be specified when the table is created with the CREATE TABLE statement, or after the table is created with the ALTER TABLE statement.
+
+CREATE TABLE table_name (
+    column1 datatype constraint,
+    column2 datatype constraint,
+    column3 datatype constraint,
+    ....
+);
+
+NOT NULL    - Ensures that a column cannot have a NULL value
+UNIQUE      - Ensures that all values in a column are different
+PRIMARY KEY - A combination of a NOT NULL and UNIQUE. Uniquely identifies each row in a table
+FOREIGN KEY - Prevents actions that would destroy links between tables
+CHECK       - Ensures that the values in a column satisfies a specific condition
+DEFAULT     - Sets a default value for a column if no value is specified
+CREATE INDEX - Used to create and retrieve data from the database very quickly
+
+	43. NOT NULL
+The NOT NULL constraint enforces a column to NOT accept NULL values.
+
+CREATE TABLE Persons (
+    ID int NOT NULL,
+    LastName varchar(255) NOT NULL,
+    FirstName varchar(255) NOT NULL,
+    Age int
+);
+ALTER TABLE Persons
+MODIFY Age int NOT NULL;
+
+	44. UNIQUE
+The UNIQUE constraint ensures that all values in a column are different.
+
+CREATE TABLE Persons (
+    ID int NOT NULL UNIQUE,
+    LastName varchar(255) NOT NULL,
+    FirstName varchar(255),
+    Age int
+);
+To name a UNIQUE constraint, and to define a UNIQUE constraint on multiple columns, use the following SQL syntax:
+CREATE TABLE Persons (
+    ID int NOT NULL,
+    LastName varchar(255) NOT NULL,
+    FirstName varchar(255),
+    Age int,
+    CONSTRAINT UC_Person UNIQUE (ID,LastName)
+);
+ALTER TABLE Persons
+ADD UNIQUE (ID);
+ALTER TABLE Persons
+ADD CONSTRAINT UC_Person UNIQUE (ID,LastName);
+To drop a UNIQUE constraint, use the following SQL:
+ALTER TABLE Persons
+DROP CONSTRAINT UC_Person; --DROP INDEX UC_Person; --MySQL
+
+	45. PRIMARY KEY
+The PRIMARY KEY constraint uniquely identifies each record in a table.
+Primary keys must contain UNIQUE values, and cannot contain NULL values.
+A table can have only ONE primary key; and in the table, this primary key can consist of single or multiple columns (fields).
+
+CREATE TABLE Persons (
+    ID int NOT NULL PRIMARY KEY, --MySQL: PRIMARY KEY (ID)
+    LastName varchar(255) NOT NULL,
+    FirstName varchar(255),
+    Age int
+);
+To allow naming of a PRIMARY KEY constraint, and for defining a PRIMARY KEY constraint on multiple columns, use the following SQL syntax.
+There is only ONE PRIMARY KEY (PK_Person). However, the VALUE of the primary key is made up of TWO COLUMNS (ID + LastName).
+CREATE TABLE Persons (
+    ID int NOT NULL,
+    LastName varchar(255) NOT NULL,
+    FirstName varchar(255),
+    Age int,
+    CONSTRAINT PK_Person PRIMARY KEY (ID,LastName)
+);
+ALTER TABLE Persons
+ADD PRIMARY KEY (ID);
+ALTER TABLE Persons
+ADD CONSTRAINT PK_Person PRIMARY KEY (ID,LastName);
+ALTER TABLE Persons
+DROP CONSTRAINT PK_Person;
+
+	46. FOREIGN KEY
+The FOREIGN KEY constraint is used to prevent actions that would destroy links between tables.
+A FOREIGN KEY is a field (or collection of fields) in one table, that refers to the PRIMARY KEY in another table.
+The table with the foreign key is called the child table, and the table with the primary key is called the referenced or parent table.
+
+CREATE TABLE Orders (
+    OrderID int NOT NULL PRIMARY KEY,
+    OrderNumber int NOT NULL,
+    PersonID int FOREIGN KEY REFERENCES Persons(PersonID)
+);
+CREATE TABLE Orders (
+    OrderID int NOT NULL,
+    OrderNumber int NOT NULL,
+    PersonID int,
+    PRIMARY KEY (OrderID),
+    CONSTRAINT FK_PersonOrder FOREIGN KEY (PersonID)
+    REFERENCES Persons(PersonID)
+);
+ALTER TABLE Orders
+ADD FOREIGN KEY (PersonID) REFERENCES Persons(PersonID);
+ALTER TABLE Orders
+ADD CONSTRAINT FK_PersonOrder
+FOREIGN KEY (PersonID) REFERENCES Persons(PersonID);
+ALTER TABLE Orders
+DROP CONSTRAINT FK_PersonOrder; --DROP FOREIGN KEY FK_PersonOrder; --MySQL
