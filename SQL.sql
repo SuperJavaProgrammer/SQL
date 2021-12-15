@@ -844,3 +844,139 @@ ADD CONSTRAINT FK_PersonOrder
 FOREIGN KEY (PersonID) REFERENCES Persons(PersonID);
 ALTER TABLE Orders
 DROP CONSTRAINT FK_PersonOrder; --DROP FOREIGN KEY FK_PersonOrder; --MySQL
+
+	47. CHECK
+The CHECK constraint is used to limit the value range that can be placed in a column.
+
+CREATE TABLE Persons (
+    ID int NOT NULL,
+    LastName varchar(255) NOT NULL,
+    FirstName varchar(255),
+    Age int CHECK (Age>=18)
+);
+CREATE TABLE Persons (
+    ID int NOT NULL,
+    LastName varchar(255) NOT NULL,
+    FirstName varchar(255),
+    Age int,
+    City varchar(255),
+    CONSTRAINT CHK_Person CHECK (Age>=18 AND City='Sandnes')
+);
+ALTER TABLE Persons
+ADD CHECK (Age>=18);
+ALTER TABLE Persons
+DROP CONSTRAINT CHK_PersonAge; --DROP CHECK CHK_PersonAge; MySQL
+
+	48. DEFAULT
+The DEFAULT constraint is used to set a default value for a column.
+The default value will be added to all new records, if no other value is specified.
+
+CREATE TABLE Persons (
+    ID int NOT NULL,
+    LastName varchar(255) NOT NULL,
+    FirstName varchar(255),
+    Age int,
+    City varchar(255) DEFAULT 'Sandnes'
+);
+CREATE TABLE Orders (
+    ID int NOT NULL,
+    OrderNumber int NOT NULL,
+    OrderDate date DEFAULT GETDATE()
+);
+ALTER TABLE Persons
+MODIFY City DEFAULT 'Sandnes';
+ALTER TABLE Persons
+ALTER COLUMN City DROP DEFAULT;
+
+	49. CREATE INDEX
+Indexes are used to retrieve data from the database more quickly than otherwise. The users cannot see the indexes, they are just used to speed up searches/queries.
+Updating a table with indexes takes more time than updating a table without (because the indexes also need an update). So, only create indexes on columns that will be frequently searched against.
+CREATE INDEX index_name
+ON table_name (column1, column2, ...);
+CREATE UNIQUE INDEX index_name
+ON table_name (column1, column2, ...);
+
+CREATE INDEX idx_lastname
+ON Persons (LastName);
+CREATE INDEX idx_pname
+ON Persons (LastName, FirstName);
+DROP INDEX index_name;
+
+	50. AUTO INCREMENT Field
+Auto-increment allows a unique number to be generated automatically when a new record is inserted into a table.
+Often this is the primary key field that we would like to be created automatically every time a new record is inserted.
+
+CREATE TABLE Persons (
+    Personid int NOT NULL AUTO_INCREMENT, --MySQL
+    LastName varchar(255) NOT NULL,
+    FirstName varchar(255),
+    Age int,
+    PRIMARY KEY (Personid)
+);
+CREATE SEQUENCE seq_person --Oracle
+MINVALUE 1 START WITH 1 INCREMENT BY 1 CACHE 10;
+INSERT INTO Persons (Personid,FirstName,LastName) VALUES (seq_person.nextval,'Lars','Monsen');
+
+	51. Working With Dates
+The most difficult part when working with dates is to be sure that the format of the date you are trying to insert, matches the format of the date column in the database.
+As long as your data contains only the date portion, your queries will work as expected. However, if a time portion is involved, it gets more complicated.
+
+DATE - format YYYY-MM-DD --MySQL
+DATETIME/TIMESTAMP  - format: YYYY-MM-DD HH:MI:SS
+YEAR - format YYYY or YY
+SELECT * FROM Orders WHERE OrderDate='2008-11-11' --no results if 2008-11-11 13:23:44
+
+	52. Views
+In SQL, a view is a virtual table based on the result-set of an SQL statement.
+A view contains rows and columns, just like a real table. The fields in a view are fields from one or more real tables in the database.
+You can add SQL statements and functions to a view and present the data as if the data were coming from one single table.
+A view is created with the CREATE VIEW statement.
+A view always shows up-to-date data! The database engine recreates the view, every time a user queries it.
+
+CREATE VIEW view_name AS
+SELECT column1, column2, ...
+FROM table_name
+WHERE condition;
+
+CREATE VIEW [Brazil Customers] AS
+SELECT CustomerName, ContactName
+FROM Customers
+WHERE Country = 'Brazil';
+SELECT * FROM [Brazil Customers];
+A view can be updated with the CREATE OR REPLACE VIEW statement.
+CREATE OR REPLACE VIEW [Brazil Customers] AS
+SELECT CustomerName, ContactName, City
+FROM Customers
+WHERE Country = 'Brazil';
+DROP VIEW [Brazil Customers];
+
+	53. Injection
+SQL injection is a code injection technique that might destroy your database.
+SQL injection is one of the most common web hacking techniques.
+SQL injection is the placement of malicious code in SQL statements, via web page input.
+
+txtNam = getRequestString("CustomerName");
+txtAdd = getRequestString("Address");
+txtCit = getRequestString("City");
+txtSQL = "INSERT INTO Customers (CustomerName,Address,City) Values(@0,@1,@2)";
+db.Execute(txtSQL,txtNam,txtAdd,txtCit);
+
+	54. Hosting
+If you want your web site to be able to store and retrieve data from a database, your web server should have access to a database-system that uses the SQL language.
+If your web server is hosted by an Internet Service Provider (ISP), you will have to look for SQL hosting plans.
+The most common SQL hosting databases are MS SQL Server, Oracle, MySQL, and MS Access.
+
+	55. Data Types
+char(размер)	2000 байт. Где размер - количество символов фиксированной длины. Если сохраняемое значение короче, то дополняется пробелами; если длиннее, то выдается ошибка.
+varchar2(размер) 4000 байт. Где размер - количество сохраняемых символов переменной длины.
+long        2GB. Символьные данные переменной длины.
+raw         2000 байт.Содержит двоичные данные переменной длины
+long raw    2GB. Содержит двоичные данные переменной длины
+number(точность,масштаб) Точность может быть в диапазоне от 1 до 38. Масштаб может быть в диапазоне от -84 до 127. Например,number (14,5) представляет собой число, которое имеет 9 знаков до запятой и 5 знаков после запятой.
+PLS_INTEGER Целые числа в диапазоне от -2,147,483,648 до 2,147,483,647 Значение PLS_INTEGER требуют меньше памяти и быстрее значений NUMBER
+date        Может принимать значения от 1 января 4712 года до н.э. до 31 декабря 9999 года нашей эры.
+BOOLEAN	TRUE или FALSE. Может принимать значение NULL
+bfile	Максимальный размер файла 4 ГБ.
+blob	Хранит до 4 ГБ двоичных данных.
+clob	Хранит до 4 ГБ символьных данных.
+nclob	Хранит до 4 ГБ символьных текстовых данных.
